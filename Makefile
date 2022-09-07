@@ -6,7 +6,7 @@ CFLAGS = -Wall
 CC = g++
 LIBS = 
 OBJ_SERVER = server.o socket.o
-OBJ_CLIENT = client.o socket.o
+OBJ_CLIENT = client.o socket.o message.o
 EXEC_SERVER = ./server
 EXEC_CLIENT = ./client
 
@@ -23,11 +23,14 @@ ${EXEC_CLIENT}: $(OBJ_CLIENT)
 server.o: server.cpp socket.cpp
 	$(CC) -c server.cpp $(CFLAGS)
 
-client.o: client.cpp socket.cpp
+client.o: client.cpp socket.cpp message.cpp
 	$(CC) -c client.cpp $(CFLAGS)
 
 socket.o: socket.cpp
 	$(CC) -c socket.cpp
+
+message.o: message.cpp message.h
+	$(CC) -c message.cpp
 
 runServer: all
 	sudo ${EXEC_SERVER}

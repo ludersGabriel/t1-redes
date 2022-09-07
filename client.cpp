@@ -8,37 +8,30 @@ using namespace std;
 #include <unistd.h>
 #include <string.h>
 #include "socket.h"
+#include "message.h"
 
-#define MARKER 0b01111110
-
-typedef struct __attribute__((packed)) test {
-    unsigned int marker : 8;
-    unsigned int size : 6;
-    unsigned int seq : 4;
-    unsigned int type : 6;
-    unsigned char buff[2 << 5];
-} message;
+#define BUFFER_SIZE 600
 
 int main(){
   int soc = ConexaoRawSocket((char*)"enp3s0");
 
-  unsigned int initSeq = 0b0000;
+  unsigned char buffer[BUFFER_SIZE];
+  unsigned int clientSeq = 0;
 
-  message b;
-  b.marker = MARKER;
-  b.size = 0b000011;
-  b.seq = initSeq;
-  b.type = 0b110000;
-
-  printf("%d\n\n", b.marker == MARKER);
-
-  unsigned char message[30];
   while(1){
-    memcpy(&message, &b, sizeof(message));
-    write(soc, message, 30);
+    Mask b;
+    b.marker = MARKER;
+    b.size = 0b000011;
+    b.seq = clientSeq;
+    b.type = 0b110000;
+    b.parity = 0b00000000;
+
+    printf("%ld\n\n", sizeof(b));
+
+    memcpy(&buffer, &b, sizeof(Message));
+    write(soc, buffer, BUFFER_SIZE);
     
-    if(b.seq == 0b1111) b.seq = initSeq;
-    else b.seq++;
+    clientSeq = (clientSeq + 1) % 16;
   }
 
 
