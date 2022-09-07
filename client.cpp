@@ -16,11 +16,11 @@ typedef struct __attribute__((packed)) test {
     unsigned int size : 6;
     unsigned int seq : 4;
     unsigned int type : 6;
-    unsigned char buff[2 << 5]
+    unsigned char buff[2 << 5];
 } message;
 
 int main(){
-  int soc = ConexaoRawSocket((char*)"lo");
+  int soc = ConexaoRawSocket((char*)"enp3s0");
 
   unsigned int initSeq = 0b0000;
 

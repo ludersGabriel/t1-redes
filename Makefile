@@ -38,7 +38,7 @@ runClient: all
 # ----------------------------------------------------------------- #
 # Cleaning directives
 clean:
-	$(RM) *.o
+	$(RM) *.o *.gch
 
 purge: clean
 	$(RM) ${EXEC_CLIENT} ${EXEC_SERVER} 
