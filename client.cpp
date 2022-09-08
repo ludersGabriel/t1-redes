@@ -18,19 +18,24 @@ int main(){
   unsigned char buffer[BUFFER_SIZE];
   unsigned int clientSeq = 0;
 
+  char *s = (char*)"batata";
+
   while(1){
     Mask b;
     b.marker = MARKER;
-    b.size = 0b000011;
+    b.size = 6;
     b.seq = clientSeq;
     b.type = 0b110000;
     b.parity = 0b00000000;
+    for(int i = 0; i < 6; i++)
+      b.buff[i] = (long int) s[i];
 
-    printf("%ld\n\n", sizeof(b));
 
     memcpy(&buffer, &b, sizeof(Message));
     write(soc, buffer, BUFFER_SIZE);
+
     
+    if(clientSeq == 15) sleep(2);
     clientSeq = (clientSeq + 1) % 16;
   }
 
