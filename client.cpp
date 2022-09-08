@@ -47,6 +47,9 @@ int main(){
     
     Mask* ma = listenWithTimeout(timedOut, soc, b, OK);
 
+    delete ma;
+    delete b;
+
     if(clientSeq == 15) sleep(2);
     clientSeq = (clientSeq + 1) % 16;
   }
