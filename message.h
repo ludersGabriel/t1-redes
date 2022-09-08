@@ -34,7 +34,8 @@ enum messageTypes {
     GET   = 0b001001,
     DESC  = 0b011000,
     DATA  = 0b100000,
-    PUT   = 0b001010
+    PUT   = 0b001010,
+    ANY   = 0b110101
 };
 
 enum errorTypes {
