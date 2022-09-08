@@ -8,42 +8,67 @@ using namespace std;
 #include <string.h>
 #include <unistd.h>
 #include "socket.h"
-
-// 11111111 0000 1111 0000
-#define MARKER 0b01111110
-
-typedef struct __attribute__((packed)) message_s {
-    unsigned int marker : 8;
-    unsigned int size : 6;
-    unsigned int seq : 4;
-    unsigned int type : 6;
-} message;
+#include "message.h"
 
 unsigned int seq = 0;
 
+Message maskToMessage(Mask& ma){
+  Message me;
+  me.marker = ma.marker;
+  me.parity = ma.parity;
+  me.seq = ma.seq;
+  me.size = ma.size;
+  me.type = ma.type;
+  for(int i = 0; i < 1 << 6; i++){
+    me.buff[i] = (unsigned char) ma.buff[i];
+  }
+
+  return me;
+}
+
 int main() {
-  char* mode = (char*) "lo";
+  char* mode = (char*) "enp39s0";
   int soc = ConexaoRawSocket(mode);
-  unsigned char buffer[30];
 
   while(1){
-    vector<message> messages;
-    for(int i = 0; i < 4; i++){
-      message m;
+    vector<Message> messages;
+    for(int i = 0; i < 1; i++){
+      Mask ma;
       do{
-        read(soc, &buffer, 30);
-        memcpy(&m, &buffer, sizeof(message));
-      }while(m.marker != MARKER || m.seq != (seq + i) % 16);
+        read(soc, &ma, sizeof(Mask));
+      }while(ma.marker != MARKER);
       
-      messages.push_back(m);
+      messages.push_back(maskToMessage(ma));
+    }
+
+    // processing message
+    Message me = messages[0];
+    if(me.seq < seq){
+      Mask ma;
+      ma.type = OK;
+      ma.marker = MARKER;
+      write(soc, &ma, sizeof(Mask));
+      continue;
     }
 
     for(auto m : messages){
-      cout << m.seq << '\n';
+      cout << m.seq << ": ";
+      for(int i = 0; i < m.size; i++){
+        cout << m.buff[i];
+      }
+      cout << '\n';
     }
 
-    cout << '\n';
-    seq += 4;
+    int a = rand() % 20;
+    if(a == 2){continue;}
+
+    Mask ma;
+    ma.type = ERROR;
+    ma.marker = MARKER;
+    write(soc, &ma, sizeof(Mask));
+
+    if(seq == 15) cout << '\n';
+    seq = (seq + 1) % 16;
   }
 
   
