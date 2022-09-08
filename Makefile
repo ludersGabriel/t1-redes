@@ -2,10 +2,10 @@
 
 # ----------------------------------------------------------------- #
 # Declaration of targets and compiling options
-CFLAGS = -Wall
+CFLAGS = -Wall -g
 CC = g++
 LIBS = 
-OBJ_SERVER = server.o socket.o message.o 
+OBJ_SERVER = server.o socket.o message.o network.o
 OBJ_CLIENT = client.o socket.o message.o network.o
 EXEC_SERVER = ./server
 EXEC_CLIENT = ./client

@@ -9,18 +9,19 @@ using namespace std;
 #include <unistd.h>
 #include "socket.h"
 #include "message.h"
+#include "network.h"
 
 unsigned int seq = 0;
 
-Message maskToMessage(Mask& ma){
-  Message me;
-  me.marker = ma.marker;
-  me.parity = ma.parity;
-  me.seq = ma.seq;
-  me.size = ma.size;
-  me.type = ma.type;
+Message* maskToMessage(Mask* ma){
+  Message* me = new Message();
+  me->marker = ma->marker;
+  me->parity = ma->parity;
+  me->seq = ma->seq;
+  me->size = ma->size;
+  me->type = ma->type;
   for(int i = 0; i < 1 << 6; i++){
-    me.buff[i] = (unsigned char) ma.buff[i];
+    me->buff[i] = (unsigned char) ma->buff[i];
   }
 
   return me;
@@ -31,39 +32,39 @@ int main() {
   int soc = ConexaoRawSocket(mode);
 
   while(1){
-    vector<Message> messages;
+    vector<Message*> messages;
     for(int i = 0; i < 1; i++){
-      Mask ma;
-      do{
-        read(soc, &ma, sizeof(Mask));
-      }while(ma.marker != MARKER);
-      
+      Mask* ma = listenType(soc, ANY);
       messages.push_back(maskToMessage(ma));
+      delete ma;
     }
 
     // processing message
-    Message me = messages[0];
-    if(me.seq < seq){
+    Message* me = messages[0];
+    if(me->seq < seq){
       Mask ma;
       ma.type = OK;
       ma.marker = MARKER;
       write(soc, &ma, sizeof(Mask));
+      delete me;
       continue;
     }
 
     for(auto m : messages){
-      cout << m.seq << ": ";
-      for(int i = 0; i < m.size; i++){
-        cout << m.buff[i];
+      cout << m->seq << ": ";
+      for(int i = 0; i < m->size; i++){
+        cout << m->buff[i];
       }
       cout << '\n';
+      delete m;
     }
+    // end of process
 
     int a = rand() % 20;
     if(a == 2){continue;}
 
     Mask ma;
-    ma.type = ERROR;
+    ma.type = OK;
     ma.marker = MARKER;
     write(soc, &ma, sizeof(Mask));
 

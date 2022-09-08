@@ -34,7 +34,7 @@ Mask* listenWithTimeout(
     return ma;
 }
 
-Mask* listenType(int type, int soc){
+Mask* listenType(int soc, int type){
   Mask* ma = new Mask;
 
   do{
