@@ -13,9 +13,11 @@ Mask* listenWithTimeout(
   int type
 ){
   Mask* ma = new Mask();
+  int acked;
+  acked = false; 
   do{
       timedOut = false;
-      
+        
       alarm(TIMEOUT);
       do{
         recv(soc, ma, sizeof(Mask), 0);
@@ -27,9 +29,17 @@ Mask* listenWithTimeout(
 
       if(timedOut){
         write(soc, resend, sizeof(Mask));
-      } 
+        continue;
+      }
 
-    }while(timedOut);
+      if(ma->type == NACK){
+        write(soc, resend, sizeof(Mask));
+      }
+      else if(ma->type == ACK){
+        acked = true;
+      }
+
+    }while(timedOut || !acked);
 
     return ma;
 }

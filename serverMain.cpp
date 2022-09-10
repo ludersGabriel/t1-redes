@@ -7,11 +7,10 @@ using namespace std;
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include "server.h"
 #include "socket.h"
 #include "message.h"
 #include "network.h"
-
-unsigned int seq = 0;
 
 Message* maskToMessage(Mask* ma){
   Message* me = new Message();
@@ -27,49 +26,60 @@ Message* maskToMessage(Mask* ma){
   return me;
 }
 
+
 int main() {
   char* mode = (char*) "enp39s0";
   int soc = ConexaoRawSocket(mode);
 
+  ::clientSeq = 0;
+  ::serverSeq = 0;
+  ::timedOut = 0;
+
   while(1){
-    vector<Message*> messages;
-    for(int i = 0; i < 1; i++){
-      Mask* ma = listenType(soc, ANY);
-      messages.push_back(maskToMessage(ma));
-      delete ma;
-    }
+    Message* recMe = maskToMessage(listenType(soc, ANY));
 
-    // processing message
-    Message* me = messages[0];
-    if(me->seq < seq){
-      Mask ma;
-      ma.type = OK;
-      ma.marker = MARKER;
-      write(soc, &ma, sizeof(Mask));
-      delete me;
-      continue;
-    }
+    switch (recMe->type){
+      case LS: {
+        cout << "[+] enviando LS\n";
+        system("ls > temp.txt");
+        ifstream temp("./temp.txt");
 
-    for(auto m : messages){
-      cout << m->seq << ": ";
-      for(int i = 0; i < m->size; i++){
-        cout << m->buff[i];
+        while(temp){
+          Mask *resp = new Mask(SHOW, ::serverSeq);
+          
+          char c;
+          int i = 0;
+          resp->size = 0;
+          for(i = 0; temp && i < BUFFER_SIZE; i++){
+            c = temp.get();
+            resp->buff[i] = c;
+          }
+
+          resp->size = i - 1;
+
+          write(soc, resp, sizeof(Mask));
+          serverSeq = (serverSeq + 1) % 16;      
+
+          Mask* ack = listenWithTimeout(
+            timedOut, 
+            soc, 
+            resp,
+            ANY
+          );
+
+          delete ack;
+          delete resp;
+        }
+
+        temp.close();
+        system("rm ./temp.txt");
+        break;
       }
-      cout << '\n';
-      delete m;
+      default:
+        break;
     }
-    // end of process
 
-    int a = rand() % 20;
-    if(a == 2){continue;}
-
-    Mask ma;
-    ma.type = OK;
-    ma.marker = MARKER;
-    write(soc, &ma, sizeof(Mask));
-
-    if(seq == 15) cout << '\n';
-    seq = (seq + 1) % 16;
+    clientSeq = (clientSeq + 1) % 16;
   }
 
   

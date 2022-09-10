@@ -1,12 +1,14 @@
 #ifndef MESSAGE_HEADER
 #define MESSAGE_HEADER
 
+#define BUFFER_SIZE 1 << 6
+
 typedef struct __attribute__((packed)) Message_s {
     unsigned int marker : 8;
     unsigned int size : 6;
     unsigned int seq : 4;
     unsigned int type : 6;
-    unsigned char buff[1 << 6];
+    unsigned char buff[(BUFFER_SIZE)];
     unsigned int parity : 8;
 } Message;
 
@@ -15,8 +17,11 @@ typedef struct __attribute__((packed)) Mask_s {
     unsigned int size : 6;
     unsigned int seq : 4;
     unsigned int type : 6;
-    unsigned long int buff[1 << 6];
+    unsigned long int buff[(BUFFER_SIZE)];
     unsigned int parity : 8;
+
+    Mask_s();
+    Mask_s(int type, int seq);
 } Mask;
  
 #define MARKER 0b01111110
