@@ -2,9 +2,9 @@
 
 # ----------------------------------------------------------------- #
 # Declaration of targets and compiling options
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -std=c++17
 CC = g++
-LIBS = 
+LIBS = -lstdc++fs 
 OBJ_SERVER = serverMain.o socket.o message.o network.o server.o
 OBJ_CLIENT = clientMain.o socket.o message.o network.o client.o
 EXEC_SERVER = ./server
@@ -21,25 +21,25 @@ ${EXEC_CLIENT}: $(OBJ_CLIENT)
 	$(CC) -o ${EXEC_CLIENT} $(OBJ_CLIENT) $(LIBS)
 
 serverMain.o: serverMain.cpp socket.cpp 
-	$(CC) -c serverMain.cpp $(CFLAGS)
+	$(CC) -c serverMain.cpp $(CFLAGS) $(LIBS)
 
 clientMain.o: clientMain.cpp socket.cpp 
-	$(CC) -c clientMain.cpp $(CFLAGS)
+	$(CC) -c clientMain.cpp $(CFLAGS) $(LIBS)
 
 socket.o: socket.cpp
-	$(CC) -c socket.cpp
+	$(CC) -c socket.cpp $(CFLAGS)
 
 client.o: client.cpp client.h
-	$(CC) -c client.cpp
+	$(CC) -c client.cpp $(CFLAGS)
 
 server.o: server.cpp server.h
-	$(CC) -c server.cpp
+	$(CC) -c server.cpp $(CFLAGS)
 
 message.o: message.cpp message.h
-	$(CC) -c message.cpp
+	$(CC) -c message.cpp $(CFLAGS)
 
 network.o: network.cpp network.h
-	$(CC) -c network.cpp
+	$(CC) -c network.cpp $(CFLAGS)
 
 runServer: all
 	sudo ${EXEC_SERVER}

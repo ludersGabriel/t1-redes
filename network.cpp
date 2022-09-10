@@ -46,3 +46,7 @@ Mask* listenType(int soc, int type){
 
   return ma;
 }
+
+void sendMask(int soc, Mask* mask){
+  write(soc, mask, sizeof(Mask));
+}

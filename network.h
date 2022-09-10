@@ -13,4 +13,6 @@ Mask* listenWithTimeout(
 
 Mask* listenType(int soc, int type);
 
+void sendMask(int soc, Mask* mask);
+
 #endif

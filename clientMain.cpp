@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <filesystem>
 using namespace std;
 
 #include <sys/types.h>
@@ -10,18 +11,17 @@ using namespace std;
 #include "socket.h"
 #include "message.h"
 #include "network.h"
+#include "client.h"
 
 #define TIMEOUT 1
 
-bool timedOut = false;
-
 void handler(int signum){
-  timedOut = true;
+  ::timedOut = true;
 }
 
 int main(){
-  int soc = ConexaoRawSocket((char*)"enp3s0");
-  timedOut = false;
+  ::soc = ConexaoRawSocket((char*)"enp3s0");
+  ::timedOut = false;
 
   struct sigaction action;
   action.sa_handler = handler;
@@ -29,28 +29,49 @@ int main(){
   action.sa_flags = 0 ;
   sigaction (SIGALRM, &action, 0);
 
-  unsigned int clientSeq = 0;
+  ::clientSeq = 0;
+  ::serverSeq = 0;
 
   char *s = (char*)"batata";
+  ::currentDir = filesystem::current_path();
+  system("clear");
+  printOptions();
 
   while(1){
-    Mask *b = new Mask();
-    b->marker = MARKER;
-    b->size = 6;
-    b->seq = clientSeq;
-    b->type = 0b110000;
-    b->parity = 0b00000000;
-    for(int i = 0; i < 6; i++)
-      b->buff[i] = (long int) s[i];
+    commandLinePrint("");
+    string opt;
+    getline(cin, opt); 
 
-    write(soc, b, sizeof(Mask));
-    
-    Mask* ma = listenWithTimeout(timedOut, soc, b, OK);
+    if(!opt.compare(::CLIENT_LS)){
+      remoteLS();
+    }
+    else if(!opt.compare(::CLIENT_LS_A)){
+      commandLinePrint("ls -a\n");
+    }
+    else if(!opt.compare(::CLIENT_LS_L)){
+      commandLinePrint("ls -l\n");
+    }
+    else if(!opt.compare(::CLIENT_LSL)){
+      system("ls");
+    }
+    else if(!opt.compare(::CLIENT_LSL_A)){
+      system("ls -a");
+    }
+    else if(!opt.compare(::CLIENT_LSL_L)){
+      system("ls -l");
+    }
+    else if(!opt.compare(::CLIENT_CLEAR)){
+      system("clear");
+    }
+    else if(!opt.compare(::CLIENT_OPTIONS)){
+      cout << '\n';
+      printOptions();
+    }
+    else{
+      commandLinePrint("default\n");
+    }
 
-    delete ma;
-    delete b;
-
-    clientSeq = (clientSeq + 1) % 16;
+    cout << "\n";
   }
 
 
