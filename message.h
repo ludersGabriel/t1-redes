@@ -51,4 +51,6 @@ enum errorTypes {
     NO_SPACE = 'E'
 };
 
+Message* maskToMessage(Mask* ma);
+
 #endif
