@@ -5,7 +5,7 @@
 CFLAGS = -Wall -g
 CC = g++
 LIBS = 
-OBJ_SERVER = server.o socket.o message.o network.o
+OBJ_SERVER = serverMain.o socket.o message.o network.o server.o
 OBJ_CLIENT = clientMain.o socket.o message.o network.o client.o
 EXEC_SERVER = ./server
 EXEC_CLIENT = ./client
@@ -20,8 +20,8 @@ ${EXEC_SERVER}: $(OBJ_SERVER)
 ${EXEC_CLIENT}: $(OBJ_CLIENT)
 	$(CC) -o ${EXEC_CLIENT} $(OBJ_CLIENT) $(LIBS)
 
-server.o: server.cpp socket.cpp 
-	$(CC) -c server.cpp $(CFLAGS)
+serverMain.o: serverMain.cpp socket.cpp 
+	$(CC) -c serverMain.cpp $(CFLAGS)
 
 clientMain.o: clientMain.cpp socket.cpp 
 	$(CC) -c clientMain.cpp $(CFLAGS)
@@ -31,6 +31,9 @@ socket.o: socket.cpp
 
 client.o: client.cpp client.h
 	$(CC) -c client.cpp
+
+server.o: server.cpp server.h
+	$(CC) -c server.cpp
 
 message.o: message.cpp message.h
 	$(CC) -c message.cpp
