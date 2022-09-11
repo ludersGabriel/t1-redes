@@ -103,6 +103,44 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
   }
 }
 
+void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, FILE* file){
+  Mask* ma = NULL;
+  ma = listenWithTimeout(
+      timedOut,
+      soc,
+      resend,
+      ANY
+    );
+
+  while(ma->type == SHOW || ma->type == DATA){
+    Message* m = maskToMessage(ma);
+    
+    for(int i = 0; i <= m->size; i++){
+      fprintf(file, "%c", m->buff[i]);
+    }
+
+    Mask *ack = new Mask(ACK, m->seq);
+    
+    int chance = rand() % 3;
+
+    sendMask(soc, ack);
+    seq = (seq + 1) % 16;
+
+    delete ma;
+    ma = listenResend(soc, ANY, seq, ack);
+    delete(ack);
+  }
+
+  if(ma->type == END){
+    Mask *ack = new Mask(ACK, ma->seq);
+    sendMask(soc, ack);
+    seq = (seq + 1) % 16;
+    delete ack;
+  }
+
+  if(ma) delete ma;
+}
+
 void sendEnd(int soc, long& seq, bool& timedOut){
   Mask *done = new Mask(END, seq);
 
