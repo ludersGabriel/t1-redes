@@ -14,7 +14,7 @@ Mask* listenWithTimeout(
 ){
   Mask* ma = new Mask();
   int acked;
-  acked = false; 
+  acked = type != ACK; 
   do{
       timedOut = false;
         
@@ -23,7 +23,7 @@ Mask* listenWithTimeout(
         recv(soc, ma, sizeof(Mask), 0);
       }while(
         !timedOut
-        && (ma->marker != MARKER || (type != ANY && ma->type != type))
+        && (ma->marker != MARKER)
       );
       alarm(0);
 
@@ -37,6 +37,7 @@ Mask* listenWithTimeout(
       }
       else if(ma->type == ACK){
         acked = true;
+        cout << "ack\n";
       }
 
     }while(timedOut || !acked);
@@ -51,7 +52,6 @@ Mask* listenType(int soc, int type){
     recv(soc, ma, sizeof(Mask), 0);
   }while(
     ma->marker != MARKER 
-    || (type != ANY && ma->type != type)
   );
 
   return ma;

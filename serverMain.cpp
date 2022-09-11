@@ -12,54 +12,34 @@ using namespace std;
 #include "message.h"
 #include "network.h"
 
-unsigned int seq = 0;
+void handler(int signum){
+  ::timedOut = true;
+}
 
 int main() {
   char* mode = (char*) "enp39s0";
-  int soc = ConexaoRawSocket(mode);
+  ::soc = ConexaoRawSocket(mode);
+
+  struct sigaction action;
+  action.sa_handler = handler;
+  sigemptyset (&action.sa_mask) ;
+  action.sa_flags = 0 ;
+  sigaction (SIGALRM, &action, 0);
 
   ::clientSeq = 0;
   ::serverSeq = 0;
-  ::timedOut = 0;
+
 
   while(1){
     Message* recMe = maskToMessage(listenType(soc, ANY));
 
     switch (recMe->type){
       case LS: {
-        cout << "[+] enviando LS\n";
-        system("ls > temp.txt");
-        ifstream temp("./temp.txt");
-
-        while(temp){
-          Mask *resp = new Mask(SHOW, ::serverSeq);
-          
-          char c;
-          int i = 0;
-          resp->size = 0;
-          for(i = 0; temp && i < BUFFER_SIZE; i++){
-            c = temp.get();
-            resp->buff[i] = c;
-          }
-
-          resp->size = i - 1;
-
-          write(soc, resp, sizeof(Mask));
-          serverSeq = (serverSeq + 1) % 16;      
-
-          Mask* ack = listenWithTimeout(
-            timedOut, 
-            soc, 
-            resp,
-            ANY
-          );
-
-          delete ack;
-          delete resp;
-        }
-
-        temp.close();
-        system("rm ./temp.txt");
+        
+        FILE* stream = popen("ls", "r");
+        sendStream(stream, SHOW);
+        sendEnd();
+        
         break;
       }
       default:
