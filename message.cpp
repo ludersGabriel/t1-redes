@@ -2,14 +2,14 @@
 #include "string.h"
 
 Mask_s::Mask_s(){
-  memset(&(this->buff), ' ', sizeof(BUFFER_SIZE));
+  memset(&(this->buff), 0l, sizeof(BUFFER_SIZE));
 }
 
 Mask_s::Mask_s(int type, int seq){
   this->marker = MARKER;
   this->type = type;
   this->seq = seq;
-  memset(&(this->buff), ' ', sizeof(BUFFER_SIZE));
+  memset(&(this->buff), 0l, sizeof(BUFFER_SIZE));
 }
 
 Message* maskToMessage(Mask* ma){

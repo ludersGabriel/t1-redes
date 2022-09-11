@@ -78,15 +78,16 @@ void sendMask(int soc, Mask* mask){
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
   while(!feof(stream)){
     Mask *resp = new Mask(SHOW, seq);
-    int i;
+
+    unsigned int i;
+    unsigned char c;
     for(i = 0; !feof(stream) && i < BUFFER_SIZE; i++){
-      char c;
       c = fgetc(stream);
-      resp->buff[i] = c;
+      resp->buff[i] = (unsigned long) c;
     }
     resp->size = i - 1;
 
-    cout << "[+] enviando LS: " << resp->seq << " " << resp->type << endl;
+    cout << "[+] enviando LS: " << resp->seq << " " << resp->type << " " << resp->size << endl;
     sendMask(soc, resp);
     seq = (seq + 1) % 16;      
 
