@@ -47,13 +47,26 @@ Mask* listenWithTimeout(
 }
 
 Mask* listenType(int soc, int type){
-  Mask* ma = new Mask;
+  Mask* ma = new Mask();
 
   do{
     recv(soc, ma, sizeof(Mask), 0);
-  }while(
-    ma->marker != MARKER 
-  );
+  }while(ma->marker != MARKER);
+
+  return ma;
+}
+
+Mask* listenResend(int soc, int type, long& seq, Mask* resend){
+  Mask* ma = NULL;
+  do{
+    if(ma) delete ma;
+    ma = listenType(soc, type);
+
+    if(ma->seq < seq){
+      sendMask(soc, resend);
+    }
+    
+  }while(ma->seq < seq);
 
   return ma;
 }

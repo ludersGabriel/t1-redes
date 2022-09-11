@@ -16,13 +16,8 @@ void printOptions(){
 }
 
 void remoteLS(){
-  Mask* lsMask = new Mask();
-  lsMask->type = LS;
-  lsMask->marker = MARKER;
-  lsMask->seq = ::clientSeq;
-
+  Mask* lsMask = new Mask(LS, ::clientSeq);
   sendMask(::soc, lsMask);
-  
   
   Mask* ma = NULL;
   ma = listenWithTimeout(
@@ -34,20 +29,31 @@ void remoteLS(){
 
   while(ma->type == SHOW){
     Message* m = maskToMessage(ma);
-
-    for(int i = 0; i < ma->size; i++){
+    
+    for(int i = 0; i <= m->size; i++){
       cout << m->buff[i];
     }
 
-    Mask *ack = new Mask();
-    ack->type = ACK;
-    ack->marker = MARKER;
-    ack->seq = m->seq;
-    sendMask(::soc, ack);
+    Mask *ack = new Mask(ACK, m->seq);
+    
+    int chance = rand() % 3;
+    // if(!(chance == 1))
+      sendMask(::soc, ack);
     ::serverSeq = (serverSeq + 1) % 16;
 
     delete ma;
-    ma = listenType(::soc, ANY);
+    ma = listenResend(::soc, ANY, ::serverSeq, ack);
+    delete(ack);
+  }
+
+  if(ma->type == END){
+    Mask *ack = new Mask();
+    ack->type = ACK;
+    ack->marker = MARKER;
+    ack->seq = ma->seq;
+    sendMask(::soc, ack);
+    ::serverSeq = (serverSeq + 1) % 16;
+    delete ack;
   }
 
   if(ma) delete ma;

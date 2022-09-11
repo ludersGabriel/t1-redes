@@ -14,6 +14,8 @@ Mask* listenWithTimeout(
 
 Mask* listenType(int soc, int type);
 
+Mask* listenResend(int soc, int type, long& seq, Mask* resend);
+
 void sendMask(int soc, Mask* mask);
 
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type);
