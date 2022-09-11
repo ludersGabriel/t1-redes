@@ -46,10 +46,13 @@ int main(){
       remoteLS();
     }
     else if(!opt.compare(::CLIENT_LS_A)){
-      commandLinePrint("ls -a\n");
+      remoteLS("-a");
     }
     else if(!opt.compare(::CLIENT_LS_L)){
-      commandLinePrint("ls -l\n");
+      remoteLS("-l");
+    }
+    else if(!opt.compare(::CLIENT_LS_LA)){
+      remoteLS("-la");
     }
     else if(!opt.compare(::CLIENT_LSL)){
       system("ls");
@@ -59,6 +62,9 @@ int main(){
     }
     else if(!opt.compare(::CLIENT_LSL_L)){
       system("ls -l");
+    }
+    else if(!opt.compare(::CLIENT_LSL_LA)){
+      system("ls -la");
     }
     else if(!opt.compare(::CLIENT_CLEAR)){
       system("clear");

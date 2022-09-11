@@ -15,42 +15,26 @@ void printOptions(){
   cout << "obs: comandos com 'l' no final são locais\n\n";
 }
 
-void remoteLS(){
-  Mask* lsMask = new Mask();
-  lsMask->type = LS;
-  lsMask->marker = MARKER;
-  lsMask->seq = ::clientSeq;
+void remoteLS(string s){
+  Mask* lsMask = new Mask(LS, ::clientSeq);
+
+  int i = 0;
+  for(auto el : s){
+    lsMask->buff[i] = (unsigned long) el; 
+    i++;
+  } 
+  lsMask->size = i;
 
   sendMask(::soc, lsMask);
   
-  
-  Mask* ma = NULL;
-  ma = listenWithTimeout(
-      ::timedOut,
-      ::soc,
-      lsMask,
-      ANY
-    );
-
-  while(ma->type == SHOW){
-    Message* m = maskToMessage(ma);
-
-    for(int i = 0; i < ma->size; i++){
-      cout << m->buff[i];
-    }
-
-    Mask *ack = new Mask();
-    ack->type = ACK;
-    ack->marker = MARKER;
-    ack->seq = m->seq;
-    sendMask(::soc, ack);
-    ::serverSeq = (serverSeq + 1) % 16;
-
-    delete ma;
-    ma = listenType(::soc, ANY);
-  }
-
-  if(ma) delete ma;
+  consumeStream(
+    ::soc,
+    ::serverSeq,
+    ::timedOut,
+    ANY,
+    lsMask,
+    stdout
+  );
 
   ::clientSeq = (::clientSeq + 1) % 16;
 

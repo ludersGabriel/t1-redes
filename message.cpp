@@ -7,9 +7,11 @@ Mask_s::Mask_s(){
 
 Mask_s::Mask_s(int type, int seq){
   this->marker = MARKER;
-  this->type = type;
+  this->size = 0;
   this->seq = seq;
+  this->type = type;
   memset(&(this->buff), 0l, sizeof(BUFFER_SIZE));
+  this->parity = 0;
 }
 
 Message* maskToMessage(Mask* ma){
