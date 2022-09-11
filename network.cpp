@@ -38,7 +38,7 @@ Mask* listenWithTimeout(
       }
       else if(ma->type == ACK){
         acked = true;
-        cout << "ack\n";
+        // cout << "ack\n";
       }
 
     }while(timedOut || !acked);
@@ -66,13 +66,21 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
   while(!feof(stream)){
     Mask *resp = new Mask(SHOW, seq);
 
-    unsigned int i;
+    unsigned int i = 0;
     unsigned char c;
-    for(i = 0; !feof(stream) && i < BUFFER_SIZE; i++){
-      c = fgetc(stream);
+
+    c = fgetc(stream);
+    for(i = 0; !feof(stream) && i < (BUFFER_SIZE) - 1; i++){
       resp->buff[i] = (unsigned long) c;
+      c = fgetc(stream);
     }
-    resp->size = i - 1;
+
+    if(!feof(stream)){
+      resp->buff[(BUFFER_SIZE) - 1] = c;
+      resp->size = i;
+    }
+    else resp->size = i - 1;
+
 
     cout << "[+] enviando LS: " << resp->seq << " " << resp->type << " " << resp->size << endl;
     sendMask(soc, resp);
@@ -88,10 +96,14 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
     delete ack;
     delete resp;
   }
+  cout << '\n';
 }
 
 void sendEnd(int soc, long& seq, bool& timedOut){
   Mask *done = new Mask(END, seq);
+
+
+  cout << "[+] enviando End: " << done->seq << " " << done->type << " " << done->size << endl << endl;
 
   sendMask(soc, done);
   seq = (seq + 1) % 16;      

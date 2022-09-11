@@ -35,8 +35,10 @@ int main() {
 
     switch (recMe->type){
       case LS: {
-        sendLS();
-        
+        string ls = "ls ";
+        for(int i = 0; i < recMe->size; i++)
+          ls += recMe->buff[i];
+        sendLS(ls);
         break;
       }
       default:

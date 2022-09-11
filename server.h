@@ -6,6 +6,6 @@ inline long serverSeq;
 inline bool timedOut;
 inline int soc;
 
-void sendLS();
+void sendLS(string ls);
 
 #endif

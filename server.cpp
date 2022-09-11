@@ -6,8 +6,12 @@ using namespace std;
 #include "message.h"
 #include "network.h"
 
-void sendLS(){
-  FILE* stream = popen("ls", "r");
+void sendLS(string ls){
+  FILE* stream = popen(&ls[0], "r");
+
+  fseek(stream, 0, SEEK_SET);
   sendStream(::soc, ::serverSeq, ::timedOut, stream, SHOW);
   sendEnd(::soc, ::serverSeq, ::timedOut);
+
+  fclose(stream);
 }
