@@ -35,10 +35,7 @@ int main() {
 
     switch (recMe->type){
       case LS: {
-        
-        FILE* stream = popen("ls", "r");
-        sendStream(stream, SHOW);
-        sendEnd();
+        sendLS();
         
         break;
       }

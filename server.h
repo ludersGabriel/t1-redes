@@ -6,8 +6,6 @@ inline long serverSeq;
 inline bool timedOut;
 inline int soc;
 
-void sendStream(FILE* stream, int type);
-
-void sendEnd();
+void sendLS();
 
 #endif

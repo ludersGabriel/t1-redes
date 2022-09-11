@@ -1,6 +1,7 @@
 #ifndef NETWORK_HEADER
 #define NEWTWOK_HEADER
 
+#include <stdlib.h>
 #include "message.h"
 #define TIMEOUT 1
 
@@ -14,5 +15,9 @@ Mask* listenWithTimeout(
 Mask* listenType(int soc, int type);
 
 void sendMask(int soc, Mask* mask);
+
+void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type);
+
+void sendEnd(int soc, long& seq, bool& timedOut);
 
 #endif

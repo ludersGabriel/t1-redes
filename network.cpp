@@ -1,10 +1,11 @@
-#include <unistd.h>
 #include <sys/socket.h>
-#include "network.h"
-#include "message.h"
-
 #include <bits/stdc++.h>
 using namespace std;
+
+#include <stdlib.h>
+#include <unistd.h>
+#include "network.h"
+#include "message.h"
 
 Mask* listenWithTimeout(
   bool& timedOut,
@@ -59,4 +60,46 @@ Mask* listenType(int soc, int type){
 
 void sendMask(int soc, Mask* mask){
   write(soc, mask, sizeof(Mask));
+}
+
+void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
+  while(!feof(stream)){
+    Mask *resp = new Mask(SHOW, seq);
+    int i;
+    for(i = 0; !feof(stream) && i < BUFFER_SIZE; i++){
+      char c;
+      c = fgetc(stream);
+      resp->buff[i] = c;
+    }
+    resp->size = i - 1;
+
+    cout << "[+] enviando LS: " << resp->seq << " " << resp->type << endl;
+    sendMask(soc, resp);
+    seq = (seq + 1) % 16;      
+
+    Mask* ack = listenWithTimeout(
+      timedOut, 
+      soc, 
+      resp,
+      ACK
+    );
+
+    delete ack;
+    delete resp;
+  }
+}
+
+void sendEnd(int soc, long& seq, bool& timedOut){
+  Mask *done = new Mask(END, seq);
+
+  sendMask(soc, done);
+  seq = (seq + 1) % 16;      
+
+  listenWithTimeout(
+      timedOut, 
+      soc, 
+      done,
+      ACK
+  );
+  delete done;
 }
