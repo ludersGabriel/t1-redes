@@ -130,3 +130,54 @@ void remoteMkdir(string args){
     return;
   }
 }
+
+void put(string args){
+  if(!filesystem::exists(args)){
+    cout << "error: arquivo não existe\n" << std::flush;
+    return;
+  }
+
+  if(filesystem::is_directory(args)){
+    cout << "error: não enviamos diretórios\n" << std::flush;
+    return;
+  }
+
+  Mask* put = new Mask(PUT, ::clientSeq);
+
+  int i = 0;
+  for(auto el : args){
+    put->buff[i] = (unsigned long) el; 
+    i++;
+  } 
+  put->size = i;
+
+  sendMask(::soc, put);
+
+  Mask* resp = listenWithTimeout(
+    ::timedOut,
+    ::soc,
+    put,
+    ANY,
+    ::serverSeq
+  );
+  
+  ::serverSeq = (::serverSeq + 1) % 16;
+
+  if(resp->type == OK){
+    FILE* f = fopen(&args[0], "rb");
+    
+    sendStream(
+      ::soc,
+      ::clientSeq,
+      ::timedOut,
+      f,
+      DATA
+    );
+    
+    sendEnd(::soc, ::clientSeq, ::timedOut);
+
+    fclose(f);
+  }else{
+
+  }
+}

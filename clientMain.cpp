@@ -103,6 +103,12 @@ int main(){
           localMkdir(ret.args);
         }
       }
+      else if(!command.compare(::CLIENT_PUT)){
+        auto ret = getArgs(opt);
+        if(!ret.error){
+          put(ret.args);
+        }
+      }
       else if(!opt.compare(::CLIENT_CLEAR)){
         system("clear");
       }
