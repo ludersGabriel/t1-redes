@@ -17,6 +17,19 @@ Mask_s::Mask_s(int type, int seq){
   this->parity = 0;
 }
 
+Mask_s::Mask_s(int type, int seq, int size, unsigned char buffer[32]){
+  this->marker = MARKER;
+  this->size = size;
+  this->seq = seq;
+  this->type = type;
+
+  for(int i = 0; i < size; i++){
+    this->buff[i] = (unsigned long) buffer[i];
+  }
+
+  this->parity = 0;
+}
+
 void setParity(Mask* mask){
   mask->parity = 0;
   for(int i = 0; i <= mask->size; i++){
@@ -40,7 +53,7 @@ Message* maskToMessage(Mask* ma){
   me->seq = ma->seq;
   me->size = ma->size;
   me->type = ma->type;
-  for(int i = 0; i < 1 << 6; i++){
+  for(int i = 0; i <= 63; i++){
     me->buff[i] = (unsigned char) ma->buff[i];
   }
 

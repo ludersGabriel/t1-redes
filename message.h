@@ -22,6 +22,7 @@ typedef struct __attribute__((packed)) Mask_s {
 
     Mask_s();
     Mask_s(int type, int seq);
+    Mask_s(int type, int seq, int size, unsigned char buffer[32]);
 } Mask;
  
 #define MARKER 0b01111110

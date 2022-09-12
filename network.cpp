@@ -120,23 +120,13 @@ void sendMask(int soc, Mask* mask){
 
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
   while(!feof(stream)){
-    Mask *resp = new Mask(SHOW, seq);
 
     unsigned int i = 0;
-    unsigned char c;
+    unsigned char buffer[63];
 
-    c = fgetc(stream);
-    for(i = 0; !feof(stream) && i < (BUFFER_SIZE) - 1; i++){
-      resp->buff[i] = (unsigned long) c;
-      c = fgetc(stream);
-    }
-
-    if(!feof(stream)){
-      resp->buff[(BUFFER_SIZE) - 1] = c;
-      resp->size = i;
-    }
-    else resp->size = i - 1;
-
+    i = fread(buffer, 1, 63, stream);
+    
+    Mask *resp = new Mask(type, seq, i, buffer);
 
     cout << "[+] sent LS: " << resp->seq << " " << resp->type << " " << resp->size << endl << std::flush;
     sendMask(soc, resp);
@@ -171,7 +161,7 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
     Message* m = maskToMessage(ma);
     
     for(int i = 0; i <= m->size; i++){
-      fprintf(file, "%c", m->buff[i]);
+      fputc(m->buff[i], file);
     }
 
     Mask *ack = new Mask(ACK, m->seq);
