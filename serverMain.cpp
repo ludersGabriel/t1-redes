@@ -33,10 +33,13 @@ int main() {
   while(1){
     Mask* ma = listenType(soc, ANY);
 
+    if(ma->seq < clientSeq) continue;
+
     Message* recMe = maskToMessage(ma);
 
     switch (recMe->type){
       case LS: {
+        cout << "[+] received LS: " << recMe->seq << endl;
         string ls = "ls ";
         for(int i = 0; i < recMe->size; i++)
           ls += recMe->buff[i];
