@@ -4,7 +4,7 @@
 using namespace std;
 
 void commandLinePrint(string out){
-  cout << currentDir << ": " << out;
+  cout << currentDir << ": " << out << std::flush;
 }
 
 void printOptions(){

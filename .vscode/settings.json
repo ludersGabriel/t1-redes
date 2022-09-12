@@ -9,6 +9,7 @@
     "regex": "cpp",
     "utility": "cpp",
     "iosfwd": "cpp",
-    "fstream": "cpp"
+    "fstream": "cpp",
+    "ostream": "cpp"
   }
 }

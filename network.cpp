@@ -11,15 +11,19 @@ Mask* listenWithTimeout(
   bool& timedOut,
   int soc,
   Mask* resend,
-  int type
+  int type,
+  long seq
 ){
   Mask* ma = new Mask();
   bool acked = type != ACK;
   bool nacked = false;
+  bool seen;
+
   do{
       timedOut = false;
       acked = type != ACK;
       nacked = false;
+      seen = false;
         
       alarm(TIMEOUT);
       do{
@@ -32,6 +36,12 @@ Mask* listenWithTimeout(
 
       if(timedOut){
         write(soc, resend, sizeof(Mask));
+        continue;
+      }
+
+      if(ma->type != ACK && ma->type != NACK && ma->seq < seq){
+        seen = true;
+        sendMask(soc, resend);
         continue;
       }
 
@@ -52,7 +62,7 @@ Mask* listenWithTimeout(
         // cout << "ack\n";
       }
 
-    }while(timedOut || !acked || nacked);
+    }while(timedOut || !acked || nacked || seen);
 
     return ma;
 }
@@ -97,20 +107,6 @@ void sendMask(int soc, Mask* mask){
   write(soc, mask, sizeof(Mask));
 }
 
-Mask* sendWait(int soc, bool& timedOut, Mask* mask){
-  write(soc, mask, sizeof(Mask));
-
-  Mask* ma = NULL;
-  ma = listenWithTimeout(
-      timedOut,
-      soc,
-      mask,
-      ANY
-    );
-
-  return ma;
-}
-
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
   while(!feof(stream)){
     Mask *resp = new Mask(SHOW, seq);
@@ -139,7 +135,8 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
       timedOut, 
       soc, 
       resp,
-      ACK
+      ACK,
+      seq
     );
 
     delete ack;
@@ -154,7 +151,8 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
       timedOut,
       soc,
       resend,
-      ANY
+      ANY,
+      seq
     );
 
   while(ma->type == SHOW || ma->type == DATA){
@@ -172,7 +170,14 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
     seq = (seq + 1) % 16;
 
     delete ma;
-    ma = listenResend(soc, ANY, seq, ack);
+    ma = listenWithTimeout(
+      timedOut,
+      soc,
+      ack,
+      ANY,
+      seq
+    );
+
     delete(ack);
   }
 
@@ -199,7 +204,8 @@ void sendEnd(int soc, long& seq, bool& timedOut){
       timedOut, 
       soc, 
       done,
-      ACK
+      ACK,
+      seq
   );
   delete done;
 }
