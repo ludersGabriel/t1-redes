@@ -31,7 +31,9 @@ int main() {
 
 
   while(1){
-    Message* recMe = maskToMessage(listenType(soc, ANY));
+    Mask* ma = listenType(soc, ANY);
+
+    Message* recMe = maskToMessage(ma);
 
     switch (recMe->type){
       case LS: {
@@ -44,7 +46,9 @@ int main() {
       default:
         break;
     }
-
+    
+    delete ma;
+    delete recMe;
     clientSeq = (clientSeq + 1) % 16;
   }
 

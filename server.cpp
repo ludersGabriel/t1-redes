@@ -9,7 +9,6 @@ using namespace std;
 void sendLS(string ls){
   FILE* stream = popen(&ls[0], "r");
 
-  fseek(stream, 0, SEEK_SET);
   sendStream(::soc, ::serverSeq, ::timedOut, stream, SHOW);
   sendEnd(::soc, ::serverSeq, ::timedOut);
 

@@ -31,7 +31,9 @@ Mask* listenWithTimeout(
       alarm(0);
 
       if(timedOut){
+        cout << "[-] timeout: " << resend->seq << endl;
         write(soc, resend, sizeof(Mask));
+        timedOut = true;
         continue;
       }
 
@@ -61,12 +63,16 @@ Mask* listenType(int soc, int type){
   Mask* ma = new Mask();
   bool nacked = false;
   do{
-    
+    nacked = false;
+
     do{
       recv(soc, ma, sizeof(Mask), 0);
     }while(ma->marker != MARKER);
 
+    // int chance = 1 == (rand() % 3);
+
     if(!checkParity(ma)){
+        cout << "[-] parity error: " << ma->seq << endl;
         Mask* nack = new Mask(NACK, ma->seq);
         sendMask(soc, nack);
         nacked = true;
@@ -132,8 +138,8 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
 
 
     cout << "[+] enviando LS: " << resp->seq << " " << resp->type << " " << resp->size << endl;
+    setParity(resp);
     sendMask(soc, resp);
-    seq = (seq + 1) % 16;      
 
     Mask* ack = listenWithTimeout(
       timedOut, 
@@ -144,6 +150,7 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
 
     delete ack;
     delete resp;
+    seq = (seq + 1) % 16;      
   }
   cout << '\n';
 }
@@ -201,5 +208,6 @@ void sendEnd(int soc, long& seq, bool& timedOut){
       done,
       ACK
   );
+  
   delete done;
 }
