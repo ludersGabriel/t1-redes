@@ -5,7 +5,7 @@ using namespace std;
 #include "string.h"
 
 Mask_s::Mask_s(){
-  memset(&(this->buff), 0l, sizeof(BUFFER_SIZE));
+  memset(&(this->buff), 0l, sizeof(unsigned long) * (BUFFER_SIZE));
 }
 
 Mask_s::Mask_s(int type, int seq){
@@ -13,7 +13,7 @@ Mask_s::Mask_s(int type, int seq){
   this->size = 0;
   this->seq = seq;
   this->type = type;
-  memset(&(this->buff), 0l, sizeof(BUFFER_SIZE));
+  memset(&(this->buff), 0l, sizeof(unsigned long) * (BUFFER_SIZE));
   this->parity = 0;
 }
 
