@@ -55,7 +55,7 @@ void localMkdir(string args){
     cout << "Error: diretório ou arquivo já existe\n" << std::flush;
   }
   
-  filesystem::create_directory(args);
+  filesystem::create_directories(args);
 }
 
 void remoteCD(string args){
@@ -77,13 +77,15 @@ void remoteCD(string args){
     ANY,
     ::serverSeq
   );
-  ::clientSeq = (::clientSeq + 1) % 16;
 
   Mask *ack = new Mask(ACK, resp->seq);
   sendMask(soc, ack);
+  ::serverSeq = (::serverSeq + 1) % 16;
+
+  ::clientSeq = (::clientSeq + 1) % 16;
 
   if(resp->type == ERROR){
-    if((unsigned char) resp->buff[0] == 'a')
+    if((unsigned char) resp->buff[0] == NO_DIR)
       cout << "error: diretório não existe\n" << std::flush;
     else{
       cout << "error: algum erro ocorreu\n" << std::flush;
@@ -91,5 +93,40 @@ void remoteCD(string args){
     return;
   }
 
-  
+}
+
+void remoteMkdir(string args){
+  Mask* mkdir = new Mask(MKDIR, ::clientSeq);
+
+  int i = 0;
+  for(auto el : args){
+    mkdir->buff[i] = (unsigned long) el; 
+    i++;
+  } 
+  mkdir->size = i;
+
+  sendMask(::soc, mkdir);
+
+  Mask* resp = listenWithTimeout(
+    ::timedOut,
+    ::soc,
+    mkdir,
+    ANY,
+    ::serverSeq
+  );
+
+  Mask *ack = new Mask(ACK, resp->seq);
+  sendMask(soc, ack);
+  ::serverSeq = (::serverSeq + 1) % 16;
+
+  ::clientSeq = (::clientSeq + 1) % 16;
+
+  if(resp->type == ERROR){
+    if((unsigned char) resp->buff[0] == DUP_DIR)
+      cout << "error: diretório ou arquivo já existe\n" << std::flush;
+    else{
+      cout << "error: algum erro ocorreu\n" << std::flush;
+    }
+    return;
+  }
 }

@@ -35,8 +35,8 @@ Mask* listenWithTimeout(
       alarm(0);
 
       if(timedOut){
-        cout << "[-] timeout: " << resend->seq << endl << std::flush;
-        write(soc, resend, sizeof(Mask));
+        cout << "[-] resent: " << resend->seq << " " << endl << std::flush;
+        sendMask(soc, resend);
         timedOut = true;
         continue;
       }
