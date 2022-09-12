@@ -86,7 +86,6 @@ int main(){
         if(!ret.error){
           remoteCD(ret.args);
         }
-        
       }
       else if(!command.compare(::CLIENT_CDL)){
         auto ret = getArgs(opt);
@@ -95,6 +94,10 @@ int main(){
         }
       }
       else if(!command.compare(::CLIENT_MKDIR)){
+        auto ret = getArgs(opt);
+        if(!ret.error){
+          remoteMkdir(ret.args);
+        }
       }
       else if(!command.compare(::CLIENT_MKDIRL)){
         auto ret = getArgs(opt);

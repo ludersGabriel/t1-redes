@@ -18,6 +18,7 @@ Mask_s::Mask_s(int type, int seq){
 }
 
 void setParity(Mask* mask){
+  mask->parity = 0;
   for(int i = 0; i <= mask->size; i++){
     mask->parity ^= (unsigned char) mask->buff[i];
   }
