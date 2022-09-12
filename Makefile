@@ -6,7 +6,7 @@ CFLAGS = -Wall -g -std=c++17
 CC = g++
 LIBS = -lstdc++fs 
 OBJ_SERVER = serverMain.o socket.o message.o network.o server.o
-OBJ_CLIENT = clientMain.o socket.o message.o network.o client.o
+OBJ_CLIENT = clientMain.o socket.o message.o network.o client.o utils.o
 EXEC_SERVER = ./server
 EXEC_CLIENT = ./client
 
@@ -23,14 +23,17 @@ ${EXEC_CLIENT}: $(OBJ_CLIENT)
 serverMain.o: serverMain.cpp socket.cpp 
 	$(CC) -c serverMain.cpp $(CFLAGS) $(LIBS)
 
-clientMain.o: clientMain.cpp socket.cpp 
+clientMain.o: clientMain.cpp socket.cpp utils.h
 	$(CC) -c clientMain.cpp $(CFLAGS) $(LIBS)
 
 socket.o: socket.cpp
 	$(CC) -c socket.cpp $(CFLAGS)
 
-client.o: client.cpp client.h
+client.o: client.cpp client.h utils.h
 	$(CC) -c client.cpp $(CFLAGS)
+
+utils.o: utils.cpp utils.h
+	$(CC) -c utils.cpp $(CFLAGS)
 
 server.o: server.cpp server.h
 	$(CC) -c server.cpp $(CFLAGS)

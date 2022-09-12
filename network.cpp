@@ -35,7 +35,7 @@ Mask* listenWithTimeout(
       alarm(0);
 
       if(timedOut){
-        cout << "[-] timeout: " << resend->seq << endl;
+        cout << "[-] timeout: " << resend->seq << endl << std::flush;
         write(soc, resend, sizeof(Mask));
         timedOut = true;
         continue;
@@ -82,7 +82,7 @@ Mask* listenType(int soc, int type){
     // int chance = 1 == (rand() % 3);
 
     if(!checkParity(ma)){
-        cout << "[-] parity error: " << ma->seq << endl;
+        cout << "[-] parity error: " << ma->seq << endl << std::flush;
         Mask* nack = new Mask(NACK, ma->seq);
         sendMask(soc, nack);
         nacked = true;
@@ -133,7 +133,7 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
     else resp->size = i - 1;
 
 
-    cout << "[+] enviando LS: " << resp->seq << " " << resp->type << " " << resp->size << endl;
+    cout << "[+] enviando LS: " << resp->seq << " " << resp->type << " " << resp->size << endl << std::flush;
     setParity(resp);
     sendMask(soc, resp);
 
@@ -153,6 +153,7 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
 }
 
 void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, FILE* file){
+  cout << "[+] listening for stream" << endl << std::flush;
   Mask* ma = NULL;
   ma = listenWithTimeout(
       timedOut,
@@ -184,7 +185,7 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
       ANY,
       seq
     );
-
+    cout << std::flush;
     delete(ack);
   }
 
@@ -202,7 +203,7 @@ void sendEnd(int soc, long& seq, bool& timedOut){
   Mask *done = new Mask(END, seq);
 
 
-  cout << "[+] enviando End: " << done->seq << " " << done->type << " " << done->size << endl << endl;
+  cout << "[+] enviando End: " << done->seq << " " << done->type << " " << done->size << "\n\n" << std::flush;
 
   sendMask(soc, done);
   seq = (seq + 1) % 16;      

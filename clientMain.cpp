@@ -13,6 +13,7 @@ using namespace std;
 #include "message.h"
 #include "network.h"
 #include "client.h"
+#include "utils.h"
 
 #define TIMEOUT 1
 
@@ -38,8 +39,8 @@ int main(){
   ::clientSeq = 0;
   ::serverSeq = 0;
 
-  char *s = (char*)"batata";
   ::currentDir = filesystem::current_path();
+
   system("clear");
   printOptions();
 
@@ -57,8 +58,9 @@ int main(){
     }
     else if(descriptors[0].revents & POLLIN){
       string opt;
-      getline(cin, opt); 
-      cout << "FUCK";
+      getline(cin, opt);
+
+      string command = opt.substr(0, opt.find(" "));
 
       if(!opt.compare(::CLIENT_LS)){
         remoteLS();
@@ -84,21 +86,33 @@ int main(){
       else if(!opt.compare(::CLIENT_LSL_LA)){
         system("ls -la");
       }
+      else if(!command.compare(::CLIENT_CD)){
+        
+      }
+      else if(!command.compare(::CLIENT_CDL)){
+        auto ret = getArgs(opt);
+        if(!ret.error){
+          localCD(ret.args);
+        }
+      }
+      else if(!command.compare(::CLIENT_MKDIR)){
+      }
+      else if(!command.compare(::CLIENT_MKDIRL)){
+        auto ret = getArgs(opt);
+        if(!ret.error){
+          localMkdir(ret.args);
+        }
+      }
       else if(!opt.compare(::CLIENT_CLEAR)){
         system("clear");
       }
       else if(!opt.compare(::CLIENT_OPTIONS)){
-        cout << '\n';
         printOptions();
       }
       else{
-        commandLinePrint("default\n");
+        cout << "Comando inválido. Remova qualquer espaço adicional e entre com um comando válido\n" << std::flush;
       }
-
-      cout << "\n";
     }
-
-    
   }
 
 
