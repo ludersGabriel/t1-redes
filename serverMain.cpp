@@ -29,6 +29,7 @@ int main() {
   ::clientSeq = 0;
   ::serverSeq = 0;
 
+  currentDir = filesystem::current_path();
 
   while(1){
     Mask* ma = listenType(soc, ANY);
@@ -39,11 +40,19 @@ int main() {
 
     switch (recMe->type){
       case LS: {
-        cout << "[+] received LS: " << recMe->seq << endl;
+        cout << "[+] received LS: " << recMe->seq << endl << std::flush;
         string ls = "ls ";
         for(int i = 0; i < recMe->size; i++)
           ls += recMe->buff[i];
         sendLS(ls);
+        break;
+      }
+      case CD: {
+        cout << "[+] received CD: " << recMe->seq << endl << std::flush;
+        string path = "";
+        for(int i = 0; i < recMe->size; i++)
+          path += recMe->buff[i];
+        resolveCD(path);
         break;
       }
       default:
