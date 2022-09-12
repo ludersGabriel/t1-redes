@@ -3,6 +3,7 @@
 using namespace std;
 
 #include "utils.h"
+#include "message.h"
 
 
 
@@ -16,8 +17,8 @@ struct ArgsRet getArgs(string opt){
     return ret;
   }else{
     string args = opt.substr(index + 1); 
-    if(!args.compare(" ") || !args.compare("")){
-      cout << "Error: Nenhum argumento passado\n" << std::flush;
+    if(!args.compare(" ") || !args.compare("") || args.length() > (BUFFER_SIZE) - 4){
+      cout << "Error: Nenhum argumento passado ou argumento maior que o tamanho permitido (60 char)\n" << std::flush;
       return ret;
     }
     else{

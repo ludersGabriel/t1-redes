@@ -25,7 +25,6 @@ void remoteLS(string s){
   } 
   lsMask->size = i;
 
-  setParity(lsMask);
   sendMask(::soc, lsMask);
   
   consumeStream(
@@ -57,4 +56,40 @@ void localMkdir(string args){
   }
   
   filesystem::create_directory(args);
+}
+
+void remoteCD(string args){
+  Mask* cd = new Mask(CD, ::clientSeq);
+
+  int i = 0;
+  for(auto el : args){
+    cd->buff[i] = (unsigned long) el; 
+    i++;
+  } 
+  cd->size = i;
+
+  sendMask(::soc, cd);
+
+  Mask* resp = listenWithTimeout(
+    ::timedOut,
+    ::soc,
+    cd,
+    ANY,
+    ::serverSeq
+  );
+  ::clientSeq = (::clientSeq + 1) % 16;
+
+  Mask *ack = new Mask(ACK, resp->seq);
+  sendMask(soc, ack);
+
+  if(resp->type == ERROR){
+    if((unsigned char) resp->buff[0] == 'a')
+      cout << "error: diretório não existe\n" << std::flush;
+    else{
+      cout << "error: algum erro ocorreu\n" << std::flush;
+    }
+    return;
+  }
+
+  
 }

@@ -17,6 +17,8 @@ Mask* listenType(int soc, int type);
 
 Mask* listenResend(int soc, int type, long& seq, Mask* resend);
 
+void readGarbage(int soc);
+
 void sendMask(int soc, Mask* mask);
 
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type);
