@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 #include "message.h"
-#define TIMEOUT 1
+#define TIMEOUT 2
 
 Mask* listenWithTimeout(
   bool& timedOut,
