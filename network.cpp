@@ -35,6 +35,13 @@ Mask* listenWithTimeout(
         continue;
       }
 
+      if(!checkParity(ma)){
+        Mask* nack = new Mask(NACK, ma->seq);
+        sendMask(soc, nack);
+        nacked = true;
+        continue;
+      }
+
       if(ma->type == NACK){
         write(soc, resend, sizeof(Mask));
         nacked = true;
@@ -52,10 +59,21 @@ Mask* listenWithTimeout(
 
 Mask* listenType(int soc, int type){
   Mask* ma = new Mask();
-
+  bool nacked = false;
   do{
-    recv(soc, ma, sizeof(Mask), 0);
-  }while(ma->marker != MARKER);
+    
+    do{
+      recv(soc, ma, sizeof(Mask), 0);
+    }while(ma->marker != MARKER);
+
+    if(!checkParity(ma)){
+        Mask* nack = new Mask(NACK, ma->seq);
+        sendMask(soc, nack);
+        nacked = true;
+        continue;
+      }
+
+  }while(nacked);
 
   return ma;
 }

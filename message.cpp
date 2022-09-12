@@ -1,3 +1,6 @@
+#include <bits/stdc++.h>
+using namespace std;
+
 #include "message.h"
 #include "string.h"
 
@@ -21,7 +24,7 @@ void setParity(Mask* mask){
 }
 
 bool checkParity(Mask* mask){
-  unsigned char p;
+  unsigned char p = 0;
   for(int i = 0; i <= mask->size; i++){
     p ^= (unsigned char) mask->buff[i];
   }
