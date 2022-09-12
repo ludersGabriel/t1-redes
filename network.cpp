@@ -69,7 +69,7 @@ Mask* listenWithTimeout(
     return ma;
 }
 
-Mask* listenType(int soc, int type){
+Mask* listenType(int soc, int type, long seq){
   Mask* ma = new Mask();
   bool nacked = false;
   do{
@@ -77,7 +77,7 @@ Mask* listenType(int soc, int type){
 
     do{
       recv(soc, ma, sizeof(Mask), 0);
-    }while(ma->marker != MARKER);
+    }while(ma->marker != MARKER || ma->seq < seq);
 
     if(!checkParity(ma)){
       cout << "[-] parity error: " << ma->seq << endl << std::flush;

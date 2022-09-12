@@ -33,9 +33,7 @@ int main() {
 
   cout << "Atualmente em: " << currentDir << endl << std::flush;
   while(1){
-    Mask* ma = listenType(soc, ANY);
-
-    if(ma->seq < ::clientSeq) continue;
+    Mask* ma = listenType(soc, ANY, ::clientSeq);
 
     cout << "RECEIVED: " << ma->seq << ", EXPECTED: " << ::clientSeq << endl << std::flush;
 

@@ -13,7 +13,7 @@ Mask* listenWithTimeout(
   long seq
 );
 
-Mask* listenType(int soc, int type);
+Mask* listenType(int soc, int type, long seq);
 
 void readGarbage(int soc);
 
