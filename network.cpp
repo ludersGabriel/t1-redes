@@ -35,7 +35,6 @@ Mask* listenWithTimeout(
       alarm(0);
 
       if(timedOut){
-        cout << "[-] resent: " << resend->seq << " " << endl << std::flush;
         sendMask(soc, resend);
         timedOut = true;
         continue;
@@ -55,7 +54,7 @@ Mask* listenWithTimeout(
       }
 
       if(ma->type == NACK){
-        write(soc, resend, sizeof(Mask));
+        sendMask(soc, resend);
         nacked = true;
         continue;
       }
@@ -115,6 +114,7 @@ void readGarbage(int soc){
 
 void sendMask(int soc, Mask* mask){
   setParity(mask);
+  cout << "sending m: " << mask->seq << endl << std::flush;
   write(soc, mask, sizeof(Mask));
 }
 
