@@ -15,8 +15,6 @@ using namespace std;
 #include "client.h"
 #include "utils.h"
 
-#define TIMEOUT 1
-
 void handler(int signum){
   ::timedOut = true;
 }
