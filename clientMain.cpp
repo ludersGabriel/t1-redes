@@ -43,18 +43,13 @@ int main(){
 
   system("clear");
   printOptions();
+  commandLinePrint("");
 
   while(1){
-    commandLinePrint("");
-
     poll(descriptors, 2, -1);
 
     if(descriptors[1].revents & POLLIN){
-      Mask* ma = listenType(soc, ANY);
-      Mask* ack = new Mask(ACK, ma->seq);
-      sendMask(soc, ack);
-      delete ma;
-      delete ack;
+      readGarbage(::soc);
     }
     else if(descriptors[0].revents & POLLIN){
       string opt;
@@ -87,6 +82,10 @@ int main(){
         system("ls -la");
       }
       else if(!command.compare(::CLIENT_CD)){
+        auto ret = getArgs(opt);
+        if(!ret.error){
+          remoteCD(ret.args);
+        }
         
       }
       else if(!command.compare(::CLIENT_CDL)){
@@ -112,7 +111,9 @@ int main(){
       else{
         cout << "Comando inválido. Remova qualquer espaço adicional e entre com um comando válido\n" << std::flush;
       }
+      commandLinePrint("");
     }
+
   }
 
 

@@ -52,4 +52,7 @@ void remoteLS(string s = "");
 void localCD(string args);
 void localMkdir(string args);
 
+void remoteCD(string args);
+void remoteMkdir(string args);
+
 #endif
