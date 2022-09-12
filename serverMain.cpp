@@ -64,6 +64,13 @@ int main() {
         resolveMkdir(path);
         break;
       }
+      case PUT: {
+        cout << "[+] received PUT: " << recMe->seq << endl << std::flush;
+        string path = "";
+        for(int i = 0; i < recMe->size; i++)
+          path += recMe->buff[i];
+        resolvePUT(path);
+      }
       default:
         break;
     }

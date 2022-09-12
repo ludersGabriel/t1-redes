@@ -17,6 +17,24 @@ void sendLS(string ls){
   clientSeq = (clientSeq + 1) % 16;
 }
 
+void resolvePUT(string path){
+  Mask* ma = new Mask(OK, ::serverSeq);
+  sendMask(soc, ma);
+  serverSeq = (serverSeq + 1) % 16;
+
+  FILE* f = fopen(&path[0], "wb");
+
+  consumeStream(
+    ::soc,
+    ::clientSeq,
+    ::timedOut,
+    ANY,
+    ma,
+    f
+  );
+}
+
+
 void resolveCD(string path){  
   if(!filesystem::is_directory(path)){
     Mask *resp = new Mask(ERROR, ::serverSeq);
