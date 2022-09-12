@@ -14,10 +14,12 @@ Mask* listenWithTimeout(
   int type
 ){
   Mask* ma = new Mask();
-  int acked;
-  acked = type != ACK; 
+  bool acked = type != ACK;
+  bool nacked = false;
   do{
       timedOut = false;
+      acked = type != ACK;
+      nacked = false;
         
       alarm(TIMEOUT);
       do{
@@ -35,13 +37,15 @@ Mask* listenWithTimeout(
 
       if(ma->type == NACK){
         write(soc, resend, sizeof(Mask));
+        nacked = true;
+        continue;
       }
       else if(ma->type == ACK){
         acked = true;
         // cout << "ack\n";
       }
 
-    }while(timedOut || !acked);
+    }while(timedOut || !acked || nacked);
 
     return ma;
 }
@@ -73,6 +77,20 @@ Mask* listenResend(int soc, int type, long& seq, Mask* resend){
 
 void sendMask(int soc, Mask* mask){
   write(soc, mask, sizeof(Mask));
+}
+
+Mask* sendWait(int soc, bool& timedOut, Mask* mask){
+  write(soc, mask, sizeof(Mask));
+
+  Mask* ma = NULL;
+  ma = listenWithTimeout(
+      timedOut,
+      soc,
+      mask,
+      ANY
+    );
+
+  return ma;
 }
 
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){

@@ -25,6 +25,7 @@ void remoteLS(string s){
   } 
   lsMask->size = i;
 
+  setParity(lsMask);
   sendMask(::soc, lsMask);
   
   consumeStream(

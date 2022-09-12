@@ -52,5 +52,7 @@ enum errorTypes {
 };
 
 Message* maskToMessage(Mask* ma);
+void setParity(Mask* mask);
+bool checkParity(Mask* mask);
 
 #endif

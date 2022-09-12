@@ -14,6 +14,21 @@ Mask_s::Mask_s(int type, int seq){
   this->parity = 0;
 }
 
+void setParity(Mask* mask){
+  for(int i = 0; i <= mask->size; i++){
+    mask->parity ^= (unsigned char) mask->buff[i];
+  }
+}
+
+bool checkParity(Mask* mask){
+  unsigned char p;
+  for(int i = 0; i <= mask->size; i++){
+    p ^= (unsigned char) mask->buff[i];
+  }
+
+  return p == mask->parity;
+}
+
 Message* maskToMessage(Mask* ma){
   Message* me = new Message();
   me->marker = ma->marker;
