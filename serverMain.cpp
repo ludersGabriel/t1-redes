@@ -31,10 +31,13 @@ int main() {
 
   currentDir = filesystem::current_path();
 
+  cout << "Atualmente em: " << currentDir << endl << std::flush;
   while(1){
     Mask* ma = listenType(soc, ANY);
 
-    if(ma->seq < clientSeq) continue;
+    if(ma->seq < ::clientSeq) continue;
+
+    cout << "RECEIVED: " << ma->seq << ", EXPECTED: " << ::clientSeq << endl << std::flush;
 
     Message* recMe = maskToMessage(ma);
 
@@ -55,13 +58,22 @@ int main() {
         resolveCD(path);
         break;
       }
+      case MKDIR: {
+        cout << "[+] received MKDIR: " << recMe->seq << endl << std::flush;
+        string path = "";
+        for(int i = 0; i < recMe->size; i++)
+          path += recMe->buff[i];
+        resolveMkdir(path);
+        break;
+      }
       default:
         break;
     }
     
     delete ma;
     delete recMe;
-    clientSeq = (clientSeq + 1) % 16;
+    cout << "Atualmente em: " << currentDir << endl << std::flush;
+
   }
 
   

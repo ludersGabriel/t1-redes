@@ -76,11 +76,8 @@ Mask* listenType(int soc, int type){
     nacked = false;
 
     do{
-      cout << "im stuck at listen type" << std::flush;
       recv(soc, ma, sizeof(Mask), 0);
     }while(ma->marker != MARKER);
-
-    // int chance = 1 == (rand() % 3);
 
     if(!checkParity(ma)){
       cout << "[-] parity error: " << ma->seq << endl << std::flush;
@@ -116,21 +113,6 @@ void readGarbage(int soc){
   delete ack;
 }
 
-Mask* listenResend(int soc, int type, long& seq, Mask* resend){
-  Mask* ma = NULL;
-  do{
-    if(ma) delete ma;
-    ma = listenType(soc, type);
-
-    if(ma->seq < seq){
-      sendMask(soc, resend);
-    }
-    
-  }while(ma->seq < seq);
-
-  return ma;
-}
-
 void sendMask(int soc, Mask* mask){
   setParity(mask);
   write(soc, mask, sizeof(Mask));
@@ -156,7 +138,7 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
     else resp->size = i - 1;
 
 
-    cout << "[+] enviando LS: " << resp->seq << " " << resp->type << " " << resp->size << endl << std::flush;
+    cout << "[+] sent LS: " << resp->seq << " " << resp->type << " " << resp->size << endl << std::flush;
     sendMask(soc, resp);
 
     Mask* ack = listenWithTimeout(
@@ -225,7 +207,7 @@ void sendEnd(int soc, long& seq, bool& timedOut){
   Mask *done = new Mask(END, seq);
 
 
-  cout << "[+] enviando End: " << done->seq << " " << done->type << " " << done->size << "\n\n" << std::flush;
+  cout << "[+] sent End: " << done->seq << " " << done->type << " " << done->size << "\n\n" << std::flush;
 
   sendMask(soc, done);
   seq = (seq + 1) % 16;      

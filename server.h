@@ -13,5 +13,6 @@ inline int soc;
 
 void sendLS(string ls);
 void resolveCD(string path);
+void resolveMkdir(string path);
 
 #endif

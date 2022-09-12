@@ -14,14 +14,15 @@ void sendLS(string ls){
   sendEnd(::soc, ::serverSeq, ::timedOut);
 
   fclose(stream);
+  clientSeq = (clientSeq + 1) % 16;
 }
 
 void resolveCD(string path){  
   if(!filesystem::is_directory(path)){
     Mask *resp = new Mask(ERROR, ::serverSeq);
-    resp->buff[0] = (unsigned long) 'a';
+    resp->buff[0] = (unsigned long) NO_DIR;
     
-    setParity(resp);
+    cout << "[+] sent CD: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
     sendMask(::soc, resp);
 
     Mask* ack = listenWithTimeout(
@@ -35,6 +36,7 @@ void resolveCD(string path){
     serverSeq = (serverSeq + 1) % 16;
     delete resp;
     delete ack;
+    clientSeq = (clientSeq + 1) % 16;
     return;
   }
 
@@ -43,7 +45,7 @@ void resolveCD(string path){
 
   Mask *resp = new Mask(OK, ::serverSeq);
   
-  setParity(resp);
+  cout << "[+] sent CD: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
   sendMask(::soc, resp);
 
   Mask* ack = listenWithTimeout(
@@ -55,7 +57,53 @@ void resolveCD(string path){
     );
 
   serverSeq = (serverSeq + 1) % 16;
+  clientSeq = (clientSeq + 1) % 16;
+  delete resp;
+  delete ack;
+}
+
+void resolveMkdir(string path){ 
+  if(filesystem::exists(path)){
+    Mask *resp = new Mask(ERROR, ::serverSeq);
+    resp->buff[0] = (unsigned long) DUP_DIR;
+    
+    cout << "[+] sent MKDIR: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
+    sendMask(::soc, resp);
+
+    Mask* ack = listenWithTimeout(
+      ::timedOut, 
+      ::soc, 
+      resp,
+      ACK,
+      ::serverSeq
+    );
+
+    serverSeq = (serverSeq + 1) % 16;
+    clientSeq = (clientSeq + 1) % 16;
+    delete resp;
+    delete ack;
+    return;
+  }
+
+  filesystem::create_directories(path);
+
+  Mask *resp = new Mask(OK, ::serverSeq);
+  
+  cout << "[+] sent CD: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
+  sendMask(::soc, resp);
+
+  Mask* ack = listenWithTimeout(
+      ::timedOut, 
+      ::soc, 
+      resp,
+      ACK,
+      ::serverSeq
+    );
+
+  serverSeq = (serverSeq + 1) % 16;
+  clientSeq = (clientSeq + 1) % 16;
 
   delete resp;
   delete ack;
+  
 }

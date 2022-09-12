@@ -15,8 +15,6 @@ Mask* listenWithTimeout(
 
 Mask* listenType(int soc, int type);
 
-Mask* listenResend(int soc, int type, long& seq, Mask* resend);
-
 void readGarbage(int soc);
 
 void sendMask(int soc, Mask* mask);
