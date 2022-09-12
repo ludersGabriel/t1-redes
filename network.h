@@ -20,8 +20,6 @@ void sendMask(int soc, Mask* mask);
 
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type);
 
-Mask* sendWait(int soc, bool& timedOut, Mask* mask);
-
 void sendEnd(int soc, long& seq, bool& timedOut);
 
 void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, FILE* buffer);

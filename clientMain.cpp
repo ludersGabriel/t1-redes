@@ -8,6 +8,7 @@ using namespace std;
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <poll.h>
 #include "socket.h"
 #include "message.h"
 #include "network.h"
@@ -22,6 +23,11 @@ void handler(int signum){
 int main(){
   ::soc = ConexaoRawSocket((char*)"enp3s0");
   ::timedOut = false;
+
+  struct pollfd descriptors[2] = {
+    {.fd = 0, .events = POLLIN, .revents = 0},
+    {.fd = soc, .events = POLLIN, .revents = 0}
+  };
 
   struct sigaction action;
   action.sa_handler = handler;
@@ -39,45 +45,60 @@ int main(){
 
   while(1){
     commandLinePrint("");
-    string opt;
-    getline(cin, opt); 
 
-    if(!opt.compare(::CLIENT_LS)){
-      remoteLS();
+    poll(descriptors, 2, -1);
+
+    if(descriptors[1].revents & POLLIN){
+      Mask* ma = listenType(soc, ANY);
+      Mask* ack = new Mask(ACK, ma->seq);
+      sendMask(soc, ack);
+      delete ma;
+      delete ack;
     }
-    else if(!opt.compare(::CLIENT_LS_A)){
-      remoteLS("-a");
-    }
-    else if(!opt.compare(::CLIENT_LS_L)){
-      remoteLS("-l");
-    }
-    else if(!opt.compare(::CLIENT_LS_LA)){
-      remoteLS("-la");
-    }
-    else if(!opt.compare(::CLIENT_LSL)){
-      system("ls");
-    }
-    else if(!opt.compare(::CLIENT_LSL_A)){
-      system("ls -a");
-    }
-    else if(!opt.compare(::CLIENT_LSL_L)){
-      system("ls -l");
-    }
-    else if(!opt.compare(::CLIENT_LSL_LA)){
-      system("ls -la");
-    }
-    else if(!opt.compare(::CLIENT_CLEAR)){
-      system("clear");
-    }
-    else if(!opt.compare(::CLIENT_OPTIONS)){
-      cout << '\n';
-      printOptions();
-    }
-    else{
-      commandLinePrint("default\n");
+    else if(descriptors[0].revents & POLLIN){
+      string opt;
+      getline(cin, opt); 
+      cout << "FUCK";
+
+      if(!opt.compare(::CLIENT_LS)){
+        remoteLS();
+      }
+      else if(!opt.compare(::CLIENT_LS_A)){
+        remoteLS("-a");
+      }
+      else if(!opt.compare(::CLIENT_LS_L)){
+        remoteLS("-l");
+      }
+      else if(!opt.compare(::CLIENT_LS_LA)){
+        remoteLS("-la");
+      }
+      else if(!opt.compare(::CLIENT_LSL)){
+        system("ls");
+      }
+      else if(!opt.compare(::CLIENT_LSL_A)){
+        system("ls -a");
+      }
+      else if(!opt.compare(::CLIENT_LSL_L)){
+        system("ls -l");
+      }
+      else if(!opt.compare(::CLIENT_LSL_LA)){
+        system("ls -la");
+      }
+      else if(!opt.compare(::CLIENT_CLEAR)){
+        system("clear");
+      }
+      else if(!opt.compare(::CLIENT_OPTIONS)){
+        cout << '\n';
+        printOptions();
+      }
+      else{
+        commandLinePrint("default\n");
+      }
+
+      cout << "\n";
     }
 
-    cout << "\n";
+    
   }
 
 
