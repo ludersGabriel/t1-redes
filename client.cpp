@@ -143,9 +143,10 @@ void put(string args){
   }
 
   Mask* put = new Mask(PUT, ::clientSeq);
+  filesystem::path p = filesystem::path(args);
 
   int i = 0;
-  for(auto el : args){
+  for(auto el : p.filename().u8string()){
     put->buff[i] = (unsigned long) el; 
     i++;
   } 
@@ -161,7 +162,10 @@ void put(string args){
     ::serverSeq
   );
   
+  Mask *ack = new Mask(ACK, resp->seq);
+  sendMask(soc, ack);
   ::serverSeq = (::serverSeq + 1) % 16;
+  ::clientSeq = (::clientSeq + 1) % 16;
 
   if(resp->type == OK){
     FILE* f = fopen(&args[0], "rb");
@@ -178,6 +182,60 @@ void put(string args){
 
     fclose(f);
   }else{
-
+    if((unsigned char) resp->buff[0] == NO_DIR){
+      cout << "error: diretório não encontrado no servidor\n" << std::flush;
+    }
   }
+}
+
+void get(string args){
+  filesystem::path p = filesystem::path(args).filename();
+
+  Mask* get = new Mask(GET, ::clientSeq);
+
+  int i = 0;
+  for(auto el : args){
+    get->buff[i] = (unsigned long) el; 
+    i++;
+  } 
+  get->size = i;
+
+  sendMask(::soc, get);
+  
+  Mask* resp = listenWithTimeout(
+    ::timedOut,
+    ::soc,
+    get,
+    ANY,
+    ::serverSeq
+  );
+  
+  Mask *ack = new Mask(ACK, resp->seq);
+  sendMask(soc, ack);
+  ::serverSeq = (::serverSeq + 1) % 16;
+  ::clientSeq = (::clientSeq + 1) % 16;
+
+
+  if(resp->type == ERROR){
+    if((unsigned char) resp->buff[0] == NO_DIR)
+      cout << "error: arquivo não existe no servidor\n" << std::flush;
+    else{
+      cout << "error: algum erro ocorreu\n" << std::flush;
+    }
+    return;
+  }else if(resp->type == OK){
+    FILE* f = fopen(&(p.u8string()[0]), "wb");
+    
+    consumeStream(
+      ::soc,
+      ::serverSeq,
+      ::timedOut,
+      DATA,
+      ack,
+      f
+    );
+
+    fclose(f);
+  }
+
 }

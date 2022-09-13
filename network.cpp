@@ -115,7 +115,6 @@ void readGarbage(int soc){
 
 void sendMask(int soc, Mask* mask){
   setParity(mask);
-  // cout << "sending m: " << mask->seq << endl << std::flush;
   write(soc, mask, sizeof(Mask));
 }
 
