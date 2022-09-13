@@ -96,14 +96,18 @@ void remoteCD(string args){
   ::clientSeq = (::clientSeq + 1) % 16;
 
   if(resp->type == ERROR){
-    if((unsigned char) resp->buff[0] == NO_DIR)
-      cout << "error: diretório não existe\n" << std::flush;
-    else{
-      cout << "error: algum erro ocorreu\n" << std::flush;
-    }
-    return;
-  }
 
+    switch((unsigned char) resp->buff[0]){
+      case NO_PERM:
+        cout << "Error: faltam permissões\n" << std::flush;
+        break;
+      case NO_DIR:
+        cout << "Error: diretorio não existe\n" << std::flush;
+        break;
+      default:
+        cout << "Error: algum erro ocorreu\n" << std::flush;
+    }
+  }
 }
 
 void remoteMkdir(string args){
