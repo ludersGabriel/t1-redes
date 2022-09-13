@@ -17,7 +17,7 @@ Mask_s::Mask_s(int type, int seq){
   this->parity = 0;
 }
 
-Mask_s::Mask_s(int type, int seq, int size, unsigned char buffer[32]){
+Mask_s::Mask_s(int type, int seq, int size, unsigned char buffer[63]){
   this->marker = MARKER;
   this->size = size;
   this->seq = seq;

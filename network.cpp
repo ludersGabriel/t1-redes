@@ -159,11 +159,16 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
 
   while(ma->type == SHOW || ma->type == DATA){
     Message* m = maskToMessage(ma);
-    
-    for(int i = 0; i <= m->size; i++){
-      fputc(m->buff[i], file);
-    }
 
+    if(ma->type == SHOW){
+      for(int i = 0; i < m->size; i++){
+        fputc(m->buff[i], file);
+      }
+    } 
+    else if(ma->type == DATA){
+      memcpy(file, ma->buff, ma->size);
+    }
+    
     Mask *ack = new Mask(ACK, m->seq);
     
     int chance = rand() % 3;
