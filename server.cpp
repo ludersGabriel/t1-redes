@@ -3,6 +3,7 @@
 using namespace std;
 
 #include <stdlib.h>
+#include <unistd.h>
 #include "server.h"
 #include "message.h"
 #include "network.h"
@@ -117,12 +118,27 @@ void resolveGET(string path){
   fclose(f);
 }
 
-void resolveCD(string path){  
-  if(!filesystem::is_directory(path)){
+void resolveCD(string path){ 
+  int ret = chdir(path.c_str());
+
+  if(ret != 0){
     Mask *resp = new Mask(ERROR, ::serverSeq);
-    resp->buff[0] = (unsigned long) NO_DIR;
-    
+    int codigo = errno;
+
+    switch (codigo){
+    case EACCES:
+    case EFAULT:
+      resp->buff[0] = (unsigned long) NO_PERM; 
+      break;
+    case ENOENT:
+    case ENOTDIR:
+      resp->buff[0] = (unsigned long) NO_DIR;
+    default:
+      break;
+    }
+
     cout << "[+] sent CD: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
+
     sendMask(::soc, resp);
 
     Mask* ack = listenWithTimeout(
@@ -140,7 +156,6 @@ void resolveCD(string path){
     return;
   }
 
-  filesystem::current_path(path);
   ::currentDir = filesystem::current_path(); 
 
   Mask *resp = new Mask(OK, ::serverSeq);
