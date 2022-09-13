@@ -109,6 +109,12 @@ int main(){
           put(ret.args);
         }
       }
+      else if(!command.compare(::CLIENT_GET)){
+        auto ret = getArgs(opt);
+        if(!ret.error){
+          get(ret.args);
+        }
+      }
       else if(!opt.compare(::CLIENT_CLEAR)){
         system("clear");
       }

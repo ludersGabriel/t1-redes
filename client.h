@@ -21,6 +21,7 @@ inline string CLIENT_CDL = "cdl";
 inline string CLIENT_MKDIR = "mkdir";
 inline string CLIENT_MKDIRL = "mkdirl";
 inline string CLIENT_PUT = "put";
+inline string CLIENT_GET = "get";
 
 
 inline vector<string> clientCommands = {
@@ -38,7 +39,8 @@ inline vector<string> clientCommands = {
   CLIENT_CDL,
   CLIENT_MKDIR,
   CLIENT_MKDIRL, 
-  CLIENT_PUT
+  CLIENT_PUT,
+  CLIENT_GET
 };
 
 inline int soc;
@@ -57,5 +59,6 @@ void localMkdir(string args);
 void remoteCD(string args);
 void remoteMkdir(string args);
 void put(string args);
+void get(string args);
 
 #endif
