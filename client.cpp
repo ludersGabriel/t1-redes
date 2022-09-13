@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "client.h"
 #include "network.h"
 
@@ -41,13 +42,23 @@ void remoteLS(string s){
 }
 
 void localCD(string args){
-  if(!filesystem::is_directory(args)){
-    cout << "Error: diretório não existe\n" << std::flush;
-    return;
+  int ret = chdir(args.c_str());
+
+  if(ret == 0){
+    ::currentDir = filesystem::current_path();
+  }else{
+    int codigo = errno;
+
+    switch(codigo){
+      case EACCES:
+      case EFAULT:
+        cout << "Error: faltam permissões\n" << std::flush;
+        break;
+      case ENOENT:
+      case ENOTDIR:
+        cout << "Error: diretorio não existe\n" << std::flush;
+    }
   }
-  
-  filesystem::current_path(args);
-  ::currentDir = filesystem::current_path();
 }
 
 void localMkdir(string args){
