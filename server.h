@@ -15,5 +15,7 @@ void sendLS(string ls);
 void resolveCD(string path);
 void resolveMkdir(string path);
 void resolvePUT(string path);
+void resolveGET(string path);
+
 
 #endif

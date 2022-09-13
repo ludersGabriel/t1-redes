@@ -18,11 +18,43 @@ void sendLS(string ls){
 }
 
 void resolvePUT(string path){
+  FILE* f = fopen(&path[0], "wb");
+
+  if(!f){
+    Mask* ma = new Mask(ERROR, ::serverSeq);
+    ma->buff[0] = (unsigned long) NO_DIR;
+    sendMask(soc, ma);
+    
+    Mask* ack = listenWithTimeout(
+      ::timedOut, 
+      ::soc, 
+      ma,
+      ACK,
+      ::serverSeq
+    );
+
+    serverSeq = (serverSeq + 1) % 16;
+    delete ma;
+    delete ack;
+    clientSeq = (clientSeq + 1) % 16;
+    return;
+  }
+
   Mask* ma = new Mask(OK, ::serverSeq);
   sendMask(soc, ma);
-  serverSeq = (serverSeq + 1) % 16;
 
-  FILE* f = fopen(&path[0], "wb");
+  Mask* ack = listenWithTimeout(
+    ::timedOut, 
+    ::soc, 
+    ma,
+    ACK,
+    ::serverSeq
+  );
+
+  serverSeq = (serverSeq + 1) % 16;
+  delete ma;
+  delete ack;
+  clientSeq = (clientSeq + 1) % 16;
 
   consumeStream(
     ::soc,
@@ -36,6 +68,54 @@ void resolvePUT(string path){
   fclose(f);
 }
 
+void resolveGET(string path){
+  if(!filesystem::exists(path) || filesystem::is_directory(path)){
+    Mask* ma = new Mask(ERROR, ::serverSeq);
+    ma->buff[0] = (unsigned long) NO_DIR;
+    sendMask(soc, ma);
+    
+    Mask* ack = listenWithTimeout(
+      ::timedOut, 
+      ::soc, 
+      ma,
+      ACK,
+      ::serverSeq
+    );
+
+    serverSeq = (serverSeq + 1) % 16;
+    delete ma;
+    delete ack;
+    clientSeq = (clientSeq + 1) % 16;
+    return;
+  }
+
+  Mask* ma = new Mask(OK, ::serverSeq);
+  sendMask(soc, ma);
+  
+  Mask* ack = listenWithTimeout(
+    ::timedOut, 
+    ::soc, 
+    ma,
+    ACK,
+    ::serverSeq
+  );
+
+  serverSeq = (serverSeq + 1) % 16;
+  delete ma;
+  delete ack;
+  clientSeq = (clientSeq + 1) % 16;
+
+  FILE* f = fopen(&path[0], "rb");
+  sendStream(
+    ::soc,
+    ::serverSeq,
+    ::timedOut,
+    f,
+    DATA
+  );
+  sendEnd(soc, ::serverSeq, ::timedOut);
+  fclose(f);
+}
 
 void resolveCD(string path){  
   if(!filesystem::is_directory(path)){

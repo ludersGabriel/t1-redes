@@ -35,6 +35,7 @@ Mask* listenWithTimeout(
       alarm(0);
 
       if(timedOut){
+        // cout << "[-] timing out, waiting for: " << seq << endl << std::flush;
         sendMask(soc, resend);
         timedOut = true;
         continue;
@@ -119,8 +120,6 @@ void sendMask(int soc, Mask* mask){
 }
 
 void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
-  FILE* temp = fopen("temp.mp4", "wb");
-  cout << "sending shit\n" << std::flush;
   while(!feof(stream)){
 
     unsigned int i = 0;
@@ -129,8 +128,6 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
     i = fread(buffer, 1, 63, stream);
     
     Mask *resp = new Mask(type, seq, i, buffer);
-    Message* teste = maskToMessage(resp);
-    fwrite(teste->buff, 1, teste->size, temp);
 
     cout << "[+] sent LS: " << resp->seq << " " << resp->type << " " << resp->size << " " << i << endl << std::flush;
     sendMask(soc, resp);
@@ -148,7 +145,6 @@ void sendStream(int soc, long& seq, bool& timedOut, FILE* stream, int type){
     seq = (seq + 1) % 16;      
   }
   cout << '\n';
-  fclose(temp);
 }
 
 void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, FILE* file){
@@ -177,10 +173,9 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
     }
     
     Mask *ack = new Mask(ACK, m->seq);
-    
     sendMask(soc, ack);
-    seq = (seq + 1) % 16;
 
+    seq = (seq + 1) % 16;
     delete ma;
     ma = listenWithTimeout(
       timedOut,
@@ -192,6 +187,7 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
     cout << std::flush;
     delete(ack);
   }
+
   if(ma->type == END){
     Mask *ack = new Mask(ACK, ma->seq);
     sendMask(soc, ack);

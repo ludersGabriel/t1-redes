@@ -70,6 +70,15 @@ int main() {
         for(int i = 0; i < recMe->size; i++)
           path += recMe->buff[i];
         resolvePUT(path);
+        break;
+      }
+      case GET: {
+        cout << "[+] received GET: " << recMe->seq << endl << std::flush;
+        string path = "";
+        for(int i = 0; i < recMe->size; i++)
+          path += recMe->buff[i];
+        resolveGET(path);
+        break;
       }
       default:
         break;
