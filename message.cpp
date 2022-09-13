@@ -53,7 +53,7 @@ Message* maskToMessage(Mask* ma){
   me->seq = ma->seq;
   me->size = ma->size;
   me->type = ma->type;
-  for(int i = 0; i <= 63; i++){
+  for(int i = 0; i < ma->size; i++){
     me->buff[i] = (unsigned char) ma->buff[i];
   }
 

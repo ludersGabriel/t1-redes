@@ -157,6 +157,7 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
       seq
     );
 
+
   while(ma->type == SHOW || ma->type == DATA){
     Message* m = maskToMessage(ma);
 
@@ -164,15 +165,14 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
       for(int i = 0; i < m->size; i++){
         fputc(m->buff[i], file);
       }
-    } 
+    }
     else if(ma->type == DATA){
-      memcpy(file, ma->buff, ma->size);
+      // cout << m->seq << " " << m->size << endl << std::flush;
+      fwrite(m->buff, 1, m->size, file);
     }
     
     Mask *ack = new Mask(ACK, m->seq);
     
-    int chance = rand() % 3;
-
     sendMask(soc, ack);
     seq = (seq + 1) % 16;
 
@@ -187,7 +187,6 @@ void consumeStream(int soc, long& seq, bool& timedOut, int type, Mask* resend, F
     cout << std::flush;
     delete(ack);
   }
-
   if(ma->type == END){
     Mask *ack = new Mask(ACK, ma->seq);
     sendMask(soc, ack);

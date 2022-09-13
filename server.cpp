@@ -28,10 +28,12 @@ void resolvePUT(string path){
     ::soc,
     ::clientSeq,
     ::timedOut,
-    ANY,
+    DATA,
     ma,
     f
   );
+
+  fclose(f);
 }
 
 
