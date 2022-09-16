@@ -16,8 +16,13 @@ void handler(int signum){
   ::timedOut = true;
 }
 
-int main() {
-  char* mode = (char*) "enp39s0";
+int main(int argc, char** argv) {
+  if(argc < 2){
+    cout << "Usage: ./server placa\n" << std::flush;
+    return 1;
+  }
+
+  char* mode = (char*) argv[1];
   ::soc = ConexaoRawSocket(mode);
 
   struct sigaction action;

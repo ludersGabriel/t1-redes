@@ -19,8 +19,14 @@ void handler(int signum){
   ::timedOut = true;
 }
 
-int main(){
-  ::soc = ConexaoRawSocket((char*)"enp3s0");
+int main(int argc, char** argv){
+
+  if(argc < 2){
+    cout << "Usage: ./client placa\n" << std::flush;
+    return 1;
+  }
+
+  ::soc = ConexaoRawSocket((char*) argv[1]);
   ::timedOut = false;
 
   struct pollfd descriptors[2] = {
