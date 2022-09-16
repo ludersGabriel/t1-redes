@@ -76,6 +76,13 @@ void localMkdir(string args){
         break;
       case EEXIST:
         cout << "Error: diretório ou arquivo já existe\n" << std::flush;
+        break;
+      case ENOENT:
+      case ENOTDIR:
+        cout << "Error: caminho não existe\n" << std::flush;
+        break;
+      default:
+        cout << "Error: algo de errado ocorreu\n" << std::flush;
     }
   }
 }
@@ -152,11 +159,14 @@ void remoteMkdir(string args){
       case NO_PERM:
         cout << "Error: faltam permissões\n" << std::flush;
         break;
-      case EEXIST:
+      case DUP_DIR:
         cout << "Error: diretório já existe\n" << std::flush;
         break;
+      case NO_DIR:
+        cout << "Error: caminho não existe\n" << std::flush;
+        break;
       default:
-        cout << "Error: algum erro ocorreu\n" << std::flush;
+        cout << "Error: algo de errado ocorreu\n" << std::flush;
     }
   }
 }
@@ -215,11 +225,19 @@ void put(string args){
     if((unsigned char) resp->buff[0] == NO_DIR){
       cout << "error: diretório não encontrado no servidor\n" << std::flush;
     }
+    else if((unsigned char) resp->buff[0] == DUP_DIR){
+      cout << "error: file já existe no servidor\n" << std::flush;
+    }
   }
 }
 
 void get(string args){
   filesystem::path p = filesystem::path(args).filename();
+
+  if(filesystem::exists(p)){
+    cout << "Error: arquivo já existe nessa máquina\n" << std::flush;
+    return;
+  }
 
   Mask* get = new Mask(GET, ::clientSeq);
 
@@ -247,7 +265,7 @@ void get(string args){
 
 
   if(resp->type == ERROR){
-    if((unsigned char) resp->buff[0] == NO_DIR)
+    if((unsigned char) resp->buff[0] == NO_FILE)
       cout << "error: arquivo não existe no servidor\n" << std::flush;
     else{
       cout << "error: algum erro ocorreu\n" << std::flush;
