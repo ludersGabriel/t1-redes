@@ -21,6 +21,27 @@ void sendLS(string ls){
 }
 
 void resolvePUT(string path){
+  if(filesystem::exists(path)){
+    Mask* ma = new Mask(ERROR, ::serverSeq);
+    ma->buff[0] = (unsigned long) DUP_DIR;
+    sendMask(soc, ma);
+    
+    Mask* ack = listenWithTimeout(
+      ::timedOut, 
+      ::soc, 
+      ma,
+      ACK,
+      ::serverSeq
+    );
+
+    serverSeq = (serverSeq + 1) % 16;
+    delete ma;
+    delete ack;
+    clientSeq = (clientSeq + 1) % 16;
+    return;
+  }
+
+
   FILE* f = fopen(&path[0], "wb");
 
   if(!f){
@@ -74,7 +95,7 @@ void resolvePUT(string path){
 void resolveGET(string path){
   if(!filesystem::exists(path) || filesystem::is_directory(path)){
     Mask* ma = new Mask(ERROR, ::serverSeq);
-    ma->buff[0] = (unsigned long) NO_DIR;
+    ma->buff[0] = (unsigned long) NO_FILE;
     sendMask(soc, ma);
     
     Mask* ack = listenWithTimeout(
@@ -193,6 +214,11 @@ void resolveMkdir(string path){
         break;
       case EEXIST:
         resp->buff[0] = (unsigned long) DUP_DIR;
+        break;
+      case ENOENT:
+      case ENOTDIR:
+        resp->buff[0] = (unsigned long) NO_DIR;
+        break;
     }
     
     cout << "[+] sent MKDIR: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
