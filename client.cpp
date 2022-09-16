@@ -1,7 +1,9 @@
 #include <unistd.h>
+#include <sys/stat.h>
 #include "client.h"
 #include "network.h"
 
+#include <bits/stdc++.h>
 using namespace std;
 
 void commandLinePrint(string out){
@@ -62,11 +64,20 @@ void localCD(string args){
 }
 
 void localMkdir(string args){
-  if(filesystem::exists(args)){
-    cout << "Error: diretório ou arquivo já existe\n" << std::flush;
+  int ret = mkdir(args.c_str(), S_IRWXU);
+
+  if(ret != 0){
+    int codigo = errno;
+
+    switch(codigo){
+      case EACCES:
+      case EFAULT:
+        cout << "Error: faltam permissões\n" << std::flush;
+        break;
+      case EEXIST:
+        cout << "Error: diretório ou arquivo já existe\n" << std::flush;
+    }
   }
-  
-  filesystem::create_directories(args);
 }
 
 void remoteCD(string args){
@@ -137,12 +148,16 @@ void remoteMkdir(string args){
   ::clientSeq = (::clientSeq + 1) % 16;
 
   if(resp->type == ERROR){
-    if((unsigned char) resp->buff[0] == DUP_DIR)
-      cout << "error: diretório ou arquivo já existe\n" << std::flush;
-    else{
-      cout << "error: algum erro ocorreu\n" << std::flush;
+    switch((unsigned char) resp->buff[0]){
+      case NO_PERM:
+        cout << "Error: faltam permissões\n" << std::flush;
+        break;
+      case EEXIST:
+        cout << "Error: diretório já existe\n" << std::flush;
+        break;
+      default:
+        cout << "Error: algum erro ocorreu\n" << std::flush;
     }
-    return;
   }
 }
 

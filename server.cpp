@@ -2,6 +2,8 @@
 #include <filesystem>
 using namespace std;
 
+#include <sys/stat.h>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include "server.h"
@@ -178,9 +180,20 @@ void resolveCD(string path){
 }
 
 void resolveMkdir(string path){ 
-  if(filesystem::exists(path)){
+  int ret = mkdir(path.c_str(), S_IRWXU);
+
+  if(ret != 0){
     Mask *resp = new Mask(ERROR, ::serverSeq);
-    resp->buff[0] = (unsigned long) DUP_DIR;
+
+    int codigo = errno;
+    switch(codigo){
+      case EACCES:
+      case EFAULT:
+        resp->buff[0] = (unsigned long) NO_PERM; 
+        break;
+      case EEXIST:
+        resp->buff[0] = (unsigned long) DUP_DIR;
+    }
     
     cout << "[+] sent MKDIR: " << resp->seq << " " << resp->type << " " << resp->size << endl << endl << std::flush;
     sendMask(::soc, resp);
@@ -199,8 +212,6 @@ void resolveMkdir(string path){
     delete ack;
     return;
   }
-
-  filesystem::create_directories(path);
 
   Mask *resp = new Mask(OK, ::serverSeq);
   
